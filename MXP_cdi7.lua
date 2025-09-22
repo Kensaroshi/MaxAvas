@@ -1,17 +1,20 @@
--- esp_gui_improved.lua
-local player = game.Players.LocalPlayer
+-- MXP_cdi7.lua (แก้ไขเต็ม)
+
+-- Services
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
-gui.Name = "ESP_GUI"
+gui.Name = "MXP_GUI"
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local Players = game:GetService("Players")
-
--- Floating Button (ซ้ายบน)
+-- Floating Button
 local floatBtn = Instance.new("TextButton")
 floatBtn.Size = UDim2.new(0, 80, 0, 40)
-floatBtn.Position = UDim2.new(0, 20, 0, 20)
+floatBtn.Position = UDim2.new(0, 50, 0, 50) -- ซ้ายบนไม่ชิดเกินไป
 floatBtn.AnchorPoint = Vector2.new(0,0)
 floatBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 floatBtn.BackgroundTransparency = 0.1
@@ -26,13 +29,13 @@ Instance.new("UICorner", floatBtn)
 -- Menu
 local menu = Instance.new("Frame")
 menu.Size = UDim2.new(0, 180, 0, 120)
-menu.Position = UDim2.new(0, 20, 0, 70)
+menu.Position = UDim2.new(0, 50, 0, 100) -- ซ้ายบน + margin
 menu.BackgroundColor3 = Color3.fromRGB(40,40,40)
 menu.Visible = false
 menu.Parent = gui
 Instance.new("UICorner", menu)
 
--- ESP Toggle
+-- ESP Toggle Button
 local espToggle = Instance.new("TextButton")
 espToggle.Size = UDim2.new(0, 140, 0, 40)
 espToggle.Position = UDim2.new(0, 20, 0, 30)
@@ -76,17 +79,33 @@ local function makeDraggable(frame)
         end
     end)
 end
+
 makeDraggable(floatBtn)
 makeDraggable(menu)
 
--- Floating Button Click (Animation)
-local tweenService = game:GetService("TweenService")
-floatBtn.MouseButton1Click:Connect(function()
-    menu.Visible = true
-    local goal = {Position = UDim2.new(menu.Position.X.Scale, menu.Position.X.Offset, menu.Position.Y.Scale, menu.Position.Y.Offset)}
-    local tween = tweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Quad), goal)
-    tween:Play()
-    menu.Visible = not menu.Visible
+-- Toggle Menu with Animation
+local function ToggleMenu()
+    if menu.Visible == false then
+        menu.Visible = true
+        TweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, 50, 0, 100) -- Slide down
+        }):Play()
+    else
+        TweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = UDim2.new(0, 50, 0, 50) -- Slide up
+        }):Play()
+        task.delay(0.3, function()
+            menu.Visible = false
+        end)
+    end
+end
+
+-- Connect Button & Hotkey G
+floatBtn.MouseButton1Click:Connect(ToggleMenu)
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.G then
+        ToggleMenu()
+    end
 end)
 
 -- ESP Logic
@@ -105,33 +124,25 @@ espToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Function สร้าง ESP Outline
 local function createESP(plr)
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        -- Outline (SurfaceGui + UIStroke)
-        local boxGui = Instance.new("SurfaceGui")
-        boxGui.Adornee = plr.Character.HumanoidRootPart
-        boxGui.AlwaysOnTop = true
-        boxGui.Face = Enum.NormalId.Top
-        boxGui.Parent = gui
-
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1,0,1,0)
-        frame.BackgroundTransparency = 1
-        frame.Parent = boxGui
-
-        local stroke = Instance.new("UIStroke")
-        stroke.Thickness = 2
-        stroke.Color = Color3.fromRGB(255,0,0)
-        stroke.Parent = frame
+        -- Outline Box
+        local box = Instance.new("BoxHandleAdornment")
+        box.Adornee = plr.Character.HumanoidRootPart
+        box.Size = Vector3.new(2,3,1)
+        box.Color3 = Color3.fromRGB(255,0,0)
+        box.AlwaysOnTop = true
+        box.Transparency = 0.5
+        box.ZIndex = 10
+        box.Parent = gui
 
         -- Name Label
-        local nameBillboard = Instance.new("BillboardGui")
-        nameBillboard.Adornee = plr.Character:FindFirstChild("Head")
-        nameBillboard.Size = UDim2.new(0,100,0,30)
-        nameBillboard.AlwaysOnTop = true
-        nameBillboard.MaxDistance = 100
-        nameBillboard.Parent = gui
+        local nameLabel = Instance.new("BillboardGui")
+        nameLabel.Size = UDim2.new(0,100,0,30)
+        nameLabel.Adornee = plr.Character:FindFirstChild("Head")
+        nameLabel.AlwaysOnTop = true
+        nameLabel.MaxDistance = 100 -- ไม่ขยายเกิน
+        nameLabel.Parent = gui
 
         local textLabel = Instance.new("TextLabel")
         textLabel.Size = UDim2.new(1,0,1,0)
@@ -140,19 +151,17 @@ local function createESP(plr)
         textLabel.TextColor3 = Color3.fromRGB(255,255,255)
         textLabel.Font = Enum.Font.GothamBold
         textLabel.TextScaled = true
-        textLabel.Parent = nameBillboard
+        textLabel.Parent = nameLabel
 
-        espObjects[plr] = {Box=boxGui, NameLabel=nameBillboard}
+        espObjects[plr] = {Box=box, NameLabel=nameLabel}
     end
 end
 
 RS.RenderStepped:Connect(function()
     if espEnabled then
         for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= player then
-                if not espObjects[plr] then
-                    createESP(plr)
-                end
+            if plr ~= player and not espObjects[plr] then
+                createESP(plr)
             end
         end
     end
@@ -166,9 +175,10 @@ Players.PlayerRemoving:Connect(function(plr)
     end
 end)
 
--- รันซ้ำเวลาตาย
+-- Reload GUI on respawn
 player.CharacterAdded:Connect(function()
     gui:Destroy()
-    wait(0.1)
-    loadstring(game:HttpGet("YOUR_RAW_URL_HERE",true))()
+    task.delay(0.1,function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kensaroshi/MaxAvas/refs/heads/main/MXP_cdi7.lua", true))()
+    end)
 end)
