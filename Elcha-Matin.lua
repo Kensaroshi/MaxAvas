@@ -14,7 +14,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 local floatBtn = Instance.new("TextButton")
 floatBtn.Size = UDim2.new(0, 80, 0, 40)
 floatBtn.Position = UDim2.new(0, 40, 0, 40)
-floatBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+floatBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 floatBtn.BorderSizePixel = 0
 floatBtn.Text = "Menu"
 floatBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -27,7 +27,7 @@ Instance.new("UICorner", floatBtn)
 local menu = Instance.new("Frame")
 menu.Size = UDim2.new(0, 300, 0, 350)
 menu.Position = UDim2.new(0, 40, 0, 90)
-menu.BackgroundColor3 = Color3.fromRGB(40,40,40)
+menu.BackgroundColor3 = Color3.fromRGB(0,0,0)
 menu.BackgroundTransparency = 1
 menu.Visible = false
 menu.Parent = gui
@@ -44,7 +44,7 @@ tabFrame.Parent = menu
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(1,0,1,-40)
 contentFrame.Position = UDim2.new(0,0,0,40)
-contentFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
+contentFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 contentFrame.Parent = menu
 Instance.new("UICorner", contentFrame)
 
@@ -53,7 +53,8 @@ local function createTabButton(name,posX)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 80, 0, 30)
     btn.Position = UDim2.new(0, posX, 0, 5)
-    btn.BackgroundColor3 = Color3.fromRGB(0,122,255)
+    btn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    btn.BorderSizePixel = 0
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.Text = name
     btn.Parent = tabFrame
@@ -137,8 +138,10 @@ local function ToggleMenu()
     if menu.Visible==false then
         menu.Visible=true
         TweenService:Create(menu,TweenInfo.new(0.3),{BackgroundTransparency=0}):Play()
+        TweenService:Create(contentFrame,TweenInfo.new(0.3),{BackgroundTransparency=0}):Play()
     else
         TweenService:Create(menu,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
+        TweenService:Create(contentFrame,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
         task.delay(0.3,function() menu.Visible=false end)
     end
 end
@@ -159,12 +162,12 @@ local function createESP(plr)
         local box=Instance.new("BoxHandleAdornment")
         box.Adornee=plr.Character.HumanoidRootPart
         box.Size=Vector3.new(2,3,1)
-        box.Color3=Color3.fromRGB(255,0,0)
+        box.Color3=Color3.fromRGB(255,255,255)
         box.AlwaysOnTop=true
-        box.Transparency=0.5
+        box.Transparency=0.8
         box.ZIndex=10
-        box.Parent=gui
         box.LineThickness=0.1 -- ขอบบาง
+        box.Parent=gui
 
         local nameLabel=Instance.new("BillboardGui")
         nameLabel.Size=UDim2.new(0,100,0,30)
@@ -208,7 +211,8 @@ end)
 local espToggle = Instance.new("TextButton")
 espToggle.Size = UDim2.new(0, 140, 0, 40)
 espToggle.Position = UDim2.new(0,20,0,20)
-espToggle.BackgroundColor3 = Color3.fromRGB(0,122,255)
+espToggle.BackgroundColor3 = Color3.fromRGB(0,0,0)
+espToggle.BorderSizePixel = 0
 espToggle.TextColor3 = Color3.fromRGB(255,255,255)
 espToggle.Font = Enum.Font.GothamBold
 espToggle.Text = "ESP OFF"
