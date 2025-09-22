@@ -1,241 +1,184 @@
-loadstring([[
--- Services
+-- Full GUI: Elcha-Matin with ESP (TPWalk removed)
 local Players = game:GetService("Players")
-local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "Elcha_Matin_GUI"
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
 
 -- Floating Button
 local floatBtn = Instance.new("TextButton")
-floatBtn.Size = UDim2.new(0, 80, 0, 40)
-floatBtn.Position = UDim2.new(0, 40, 0, 40)
+floatBtn.Size = UDim2.new(0,80,0,40)
+floatBtn.Position = UDim2.new(0,40,0,40)
 floatBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
-floatBtn.BorderSizePixel = 0
 floatBtn.Text = "Menu"
 floatBtn.TextColor3 = Color3.fromRGB(255,255,255)
+floatBtn.Font = Enum.Font.Gotham
 floatBtn.TextScaled = true
-floatBtn.AutoButtonColor = false
 floatBtn.Parent = gui
 Instance.new("UICorner", floatBtn)
+local fbStroke = Instance.new("UIStroke", floatBtn)
+fbStroke.Thickness = 0.5
+fbStroke.Color = Color3.fromRGB(255,255,255)
 
--- Main Menu Frame
+-- Menu Frame
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 300, 0, 350)
-menu.Position = UDim2.new(0, 40, 0, 90)
+menu.Size = UDim2.new(0,300,0,350)
+menu.Position = UDim2.new(0,40,0,90)
 menu.BackgroundColor3 = Color3.fromRGB(0,0,0)
 menu.BackgroundTransparency = 1
 menu.Visible = false
 menu.Parent = gui
 Instance.new("UICorner", menu)
+local menuStroke = Instance.new("UIStroke", menu)
+menuStroke.Thickness = 0.5
+menuStroke.Color = Color3.fromRGB(255,255,255)
 
--- Tab Buttons Frame
-local tabFrame = Instance.new("Frame")
+-- Tabs
+local tabFrame = Instance.new("Frame", menu)
 tabFrame.Size = UDim2.new(1,0,0,40)
-tabFrame.Position = UDim2.new(0,0,0,0)
 tabFrame.BackgroundTransparency = 1
-tabFrame.Parent = menu
-
--- Content Frame
-local contentFrame = Instance.new("Frame")
+local contentFrame = Instance.new("Frame", menu)
 contentFrame.Size = UDim2.new(1,0,1,-40)
 contentFrame.Position = UDim2.new(0,0,0,40)
-contentFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-contentFrame.Parent = menu
-Instance.new("UICorner", contentFrame)
+contentFrame.BackgroundTransparency = 1
 
--- Function to create Tab Buttons
-local function createTabButton(name,posX)
+local function createTab(name,x)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 80, 0, 30)
-    btn.Position = UDim2.new(0, posX, 0, 5)
+    btn.Size = UDim2.new(0,80,0,30)
+    btn.Position = UDim2.new(0,x,0,5)
     btn.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    btn.BorderSizePixel = 0
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextScaled = true
     btn.Parent = tabFrame
     Instance.new("UICorner", btn)
+    local s = Instance.new("UIStroke", btn)
+    s.Thickness = 0.5
+    s.Color = Color3.fromRGB(255,255,255)
     return btn
 end
 
-local homeBtn = createTabButton("Home",10)
-local localPlayerBtn = createTabButton("LocalPlayer",110)
-local settingsBtn = createTabButton("Settings",210)
+local homeBtn = createTab("Home",10)
+local lpBtn = createTab("Local",110)
+local setBtn = createTab("Settings",210)
 
--- Content Pages
-local homePage = Instance.new("Frame")
+-- Pages
+local homePage = Instance.new("Frame", contentFrame)
 homePage.Size = UDim2.new(1,0,1,0)
 homePage.BackgroundTransparency = 1
-homePage.Parent = contentFrame
 
-local localPlayerPage = Instance.new("Frame")
-localPlayerPage.Size = UDim2.new(1,0,1,0)
-localPlayerPage.BackgroundTransparency = 1
-localPlayerPage.Visible = false
-localPlayerPage.Parent = contentFrame
+local lpPage = Instance.new("Frame", contentFrame)
+lpPage.Size = UDim2.new(1,0,1,0)
+lpPage.BackgroundTransparency = 1
+lpPage.Visible=false
 
-local settingsPage = Instance.new("Frame")
-settingsPage.Size = UDim2.new(1,0,1,0)
-settingsPage.BackgroundTransparency = 1
-settingsPage.Visible = false
-settingsPage.Parent = contentFrame
+local setPage = Instance.new("Frame", contentFrame)
+setPage.Size = UDim2.new(1,0,1,0)
+setPage.BackgroundTransparency = 1
+setPage.Visible=false
 
--- Tab Switching Logic
 local function showPage(page)
-    homePage.Visible = false
-    localPlayerPage.Visible = false
-    settingsPage.Visible = false
-    page.Visible = true
+    homePage.Visible=false
+    lpPage.Visible=false
+    setPage.Visible=false
+    page.Visible=true
 end
-
 homeBtn.MouseButton1Click:Connect(function() showPage(homePage) end)
-localPlayerBtn.MouseButton1Click:Connect(function() showPage(localPlayerPage) end)
-settingsBtn.MouseButton1Click:Connect(function() showPage(settingsPage) end)
+lpBtn.MouseButton1Click:Connect(function() showPage(lpPage) end)
+setBtn.MouseButton1Click:Connect(function() showPage(setPage) end)
 
--- Drag Function
-local function makeDraggable(frame)
-    local dragging=false
-    local dragInput, mousePos, framePos
-    frame.InputBegan:Connect(function(input)
+-- Dragging
+local function makeDraggable(obj)
+    local drag=false; local startPos; local startInput
+    obj.InputBegan:Connect(function(input)
         if input.UserInputType==Enum.UserInputType.MouseButton1 then
-            dragging=true
-            mousePos=input.Position
-            framePos=frame.Position
+            drag=true; startPos=obj.Position; startInput=input.Position
             input.Changed:Connect(function()
-                if input.UserInputState==Enum.UserInputState.End then
-                    dragging=false
-                end
+                if input.UserInputState==Enum.UserInputState.End then drag=false end
             end)
         end
     end)
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseMovement then
-            dragInput=input
-        end
-    end)
     UIS.InputChanged:Connect(function(input)
-        if input==dragInput and dragging then
-            local delta=input.Position-mousePos
-            frame.Position=UDim2.new(
-                framePos.X.Scale,
-                framePos.X.Offset+delta.X,
-                framePos.Y.Scale,
-                framePos.Y.Offset+delta.Y
-            )
+        if drag and input.UserInputType==Enum.UserInputType.MouseMovement then
+            local delta=input.Position-startInput
+            obj.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
         end
     end)
 end
-
 makeDraggable(floatBtn)
 makeDraggable(menu)
 
--- Toggle Menu Fade
-local function ToggleMenu()
-    if menu.Visible==false then
+-- Toggle Menu (Fade)
+local menuOpen=false
+local tweenInfo = TweenInfo.new(0.25,Enum.EasingStyle.Linear)
+local function toggleMenu()
+    menuOpen = not menuOpen
+    if menuOpen then
         menu.Visible=true
-        TweenService:Create(menu,TweenInfo.new(0.3),{BackgroundTransparency=0}):Play()
-        TweenService:Create(contentFrame,TweenInfo.new(0.3),{BackgroundTransparency=0}):Play()
+        TweenService:Create(menu,tweenInfo,{BackgroundTransparency=0.3}):Play()
     else
-        TweenService:Create(menu,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-        TweenService:Create(contentFrame,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-        task.delay(0.3,function() menu.Visible=false end)
+        local tw = TweenService:Create(menu,tweenInfo,{BackgroundTransparency=1})
+        tw:Play()
+        tw.Completed:Connect(function()
+            if not menuOpen then menu.Visible=false end
+        end)
     end
 end
-
-floatBtn.MouseButton1Click:Connect(ToggleMenu)
+floatBtn.MouseButton1Click:Connect(toggleMenu)
 UIS.InputBegan:Connect(function(input,gp)
-    if not gp and input.KeyCode==Enum.KeyCode.G then
-        ToggleMenu()
-    end
+    if not gp and input.KeyCode==Enum.KeyCode.G then toggleMenu() end
 end)
 
--- ESP in Home Page
+-- ESP
 local espEnabled=false
-local espObjects={}
-
-local function createESP(plr)
-    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        local box=Instance.new("BoxHandleAdornment")
-        box.Adornee=plr.Character.HumanoidRootPart
-        box.Size=Vector3.new(2,3,1)
-        box.Color3=Color3.fromRGB(255,255,255)
-        box.AlwaysOnTop=true
-        box.Transparency=0.8
-        box.ZIndex=10
-        box.LineThickness=0.1 -- ขอบบาง
-        box.Parent=gui
-
-        local nameLabel=Instance.new("BillboardGui")
-        nameLabel.Size=UDim2.new(0,100,0,30)
-        nameLabel.Adornee=plr.Character:FindFirstChild("Head")
-        nameLabel.AlwaysOnTop=true
-        nameLabel.MaxDistance=100
-        nameLabel.Parent=gui
-
-        local textLabel=Instance.new("TextLabel")
-        textLabel.Size=UDim2.new(1,0,1,0)
-        textLabel.BackgroundTransparency=1
-        textLabel.Text=plr.Name
-        textLabel.TextColor3=Color3.fromRGB(255,255,255)
-        textLabel.Font=Enum.Font.GothamBold
-        textLabel.TextScaled=true
-        textLabel.Parent=nameLabel
-
-        espObjects[plr]={Box=box,NameLabel=nameLabel}
+local espList={}
+local function addESP(plr)
+    if plr.Character and not espList[plr] then
+        local h=Instance.new("Highlight")
+        h.Adornee=plr.Character
+        h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+        h.FillTransparency=1
+        h.OutlineColor=Color3.fromRGB(255,255,255)
+        h.OutlineTransparency=0
+        h.Parent=gui
+        espList[plr]=h
     end
 end
+Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function() if espEnabled then addESP(plr) end end)
+end)
+Players.PlayerRemoving:Connect(function(plr)
+    if espList[plr] then espList[plr]:Destroy(); espList[plr]=nil end
+end)
 
-RS.RenderStepped:Connect(function()
+local espBtn = Instance.new("TextButton", homePage)
+espBtn.Size = UDim2.new(0,140,0,40)
+espBtn.Position = UDim2.new(0,20,0,20)
+espBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+espBtn.Text = "ESP OFF"
+espBtn.TextColor3 = Color3.fromRGB(255,255,255)
+espBtn.Font = Enum.Font.Gotham
+espBtn.TextScaled = true
+Instance.new("UICorner", espBtn)
+local espStroke = Instance.new("UIStroke", espBtn)
+espStroke.Thickness=0.5
+espStroke.Color = Color3.fromRGB(255,255,255)
+
+espBtn.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espBtn.Text = espEnabled and "ESP ON" or "ESP OFF"
     if espEnabled then
         for _,plr in pairs(Players:GetPlayers()) do
-            if plr~=player and not espObjects[plr] then
-                createESP(plr)
-            end
+            if plr~=player then addESP(plr) end
         end
+    else
+        for _,h in pairs(espList) do h:Destroy() end
+        espList={}
     end
 end)
-
-Players.PlayerRemoving:Connect(function(plr)
-    if espObjects[plr] then
-        if espObjects[plr].Box then espObjects[plr].Box:Destroy() end
-        if espObjects[plr].NameLabel then espObjects[plr].NameLabel:Destroy() end
-        espObjects[plr]=nil
-    end
-end)
-
--- ESP Toggle Button in Home
-local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(0, 140, 0, 40)
-espToggle.Position = UDim2.new(0,20,0,20)
-espToggle.BackgroundColor3 = Color3.fromRGB(0,0,0)
-espToggle.BorderSizePixel = 0
-espToggle.TextColor3 = Color3.fromRGB(255,255,255)
-espToggle.Font = Enum.Font.GothamBold
-espToggle.Text = "ESP OFF"
-espToggle.Parent = homePage
-Instance.new("UICorner", espToggle)
-
-espToggle.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    espToggle.Text = espEnabled and "ESP ON" or "ESP OFF"
-    if not espEnabled then
-        for _, obj in pairs(espObjects) do
-            if obj.Box then obj.Box:Destroy() end
-            if obj.NameLabel then obj.NameLabel:Destroy() end
-        end
-        espObjects = {}
-    end
-end)
-
--- Reload GUI on respawn
-player.CharacterAdded:Connect(function()
-    gui:Destroy()
-    task.delay(0.1,function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kensaroshi/MaxAvas/refs/heads/main/Elcha-Matin.lua",true))()
-    end)
-end)
-]])()
