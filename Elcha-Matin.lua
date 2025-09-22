@@ -1,4 +1,4 @@
--- MXP_cdi7.lua (แก้ไขเต็ม)
+-- Elcha-Matin.lua (Loadstring Ready)
 
 -- Services
 local Players = game:GetService("Players")
@@ -8,13 +8,13 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
-gui.Name = "MXP_GUI"
+gui.Name = "Elcha_Matin_GUI"
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- Floating Button
 local floatBtn = Instance.new("TextButton")
 floatBtn.Size = UDim2.new(0, 80, 0, 40)
-floatBtn.Position = UDim2.new(0, 50, 0, 50) -- ซ้ายบนไม่ชิดเกินไป
+floatBtn.Position = UDim2.new(0, 30, 0, 30) -- ซ้ายบน ลดมาซ้ายอีกนิด
 floatBtn.AnchorPoint = Vector2.new(0,0)
 floatBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 floatBtn.BackgroundTransparency = 0.1
@@ -29,8 +29,9 @@ Instance.new("UICorner", floatBtn)
 -- Menu
 local menu = Instance.new("Frame")
 menu.Size = UDim2.new(0, 180, 0, 120)
-menu.Position = UDim2.new(0, 50, 0, 100) -- ซ้ายบน + margin
+menu.Position = UDim2.new(0, 30, 0, 80)
 menu.BackgroundColor3 = Color3.fromRGB(40,40,40)
+menu.BackgroundTransparency = 1 -- เริ่มโปร่งสำหรับ fade
 menu.Visible = false
 menu.Parent = gui
 Instance.new("UICorner", menu)
@@ -83,20 +84,14 @@ end
 makeDraggable(floatBtn)
 makeDraggable(menu)
 
--- Toggle Menu with Animation
+-- Toggle Menu (Fade In/Out)
 local function ToggleMenu()
     if menu.Visible == false then
         menu.Visible = true
-        TweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Position = UDim2.new(0, 50, 0, 100) -- Slide down
-        }):Play()
+        TweenService:Create(menu, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
     else
-        TweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(0, 50, 0, 50) -- Slide up
-        }):Play()
-        task.delay(0.3, function()
-            menu.Visible = false
-        end)
+        TweenService:Create(menu, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        task.delay(0.3, function() menu.Visible = false end)
     end
 end
 
@@ -126,7 +121,7 @@ end)
 
 local function createESP(plr)
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        -- Outline Box
+        -- Outline Box (ขอบเฉพาะ)
         local box = Instance.new("BoxHandleAdornment")
         box.Adornee = plr.Character.HumanoidRootPart
         box.Size = Vector3.new(2,3,1)
@@ -135,13 +130,14 @@ local function createESP(plr)
         box.Transparency = 0.5
         box.ZIndex = 10
         box.Parent = gui
+        box.LineThickness = 0.1 -- บางแต่ชัด
 
         -- Name Label
         local nameLabel = Instance.new("BillboardGui")
         nameLabel.Size = UDim2.new(0,100,0,30)
         nameLabel.Adornee = plr.Character:FindFirstChild("Head")
         nameLabel.AlwaysOnTop = true
-        nameLabel.MaxDistance = 100 -- ไม่ขยายเกิน
+        nameLabel.MaxDistance = 100
         nameLabel.Parent = gui
 
         local textLabel = Instance.new("TextLabel")
@@ -179,6 +175,6 @@ end)
 player.CharacterAdded:Connect(function()
     gui:Destroy()
     task.delay(0.1,function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kensaroshi/MaxAvas/refs/heads/main/MXP_cdi7.lua", true))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kensaroshi/MaxAvas/refs/heads/main/Elcha-Matin.lua", true))()
     end)
 end)
